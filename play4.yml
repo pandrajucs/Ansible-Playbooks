@@ -1,0 +1,69 @@
+#Playbook to run nginx with app installed from remote git folder using handlers & tags
+
+---
+  - name: playbook for installing nginx on webservers
+    hosts: web
+    gather_facts: no
+    tasks:
+      - name: run apt update
+        command: apt update
+        tags:
+          - update
+
+      - name: install nginx
+        apt: >
+          name=nginx
+          state=present
+        tags:
+            - install
+
+      - name: clone git repo
+        shell: cd /tmp && git clone https://github.com/panrajucs/dockertest1.git
+
+      - name: copy html file to destination
+        notify:
+           - restart nginx
+        copy: >
+           src=/tmp/dockertest1/index.html
+           dest=/var/www/html/index.html
+           remote_src=yes
+           owner=root
+           group=root
+           mode=0644
+        tags:
+            - html
+
+      - name: copy css files to destination
+        notify:
+          - restart nginx
+        copy: >
+          src=/tmp/dockertest1/style.css
+          dest=/var/www/html/style.css
+          remote_src=yes
+          owner=root
+          group=root
+          mode=0644
+        tags: 
+           - css
+
+      - name: copy js file to destination
+        notify:
+          - restart nginx
+        copy: >
+          src=/tmp/dockertest1/scorekeeper.js
+          dest=/var/www/html/scorekeeper.js
+          remote_src=yes
+          owner=root
+          group=root
+          mode=0644
+        tags:
+           - js
+
+      - name: delete git repo
+        shell: rm -rf /tmp/dockertest1
+        tags:
+          - delete
+
+    handlers:
+       - name: restart nginx
+         command: service nginx restart

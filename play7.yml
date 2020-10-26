@@ -1,0 +1,68 @@
+#Playbook of Ansible templates
+
+---
+  - name: Play for install  nginx on webservers using templates
+    hosts: web
+    gather_facts: yes
+    vars:
+       custom_heading: "RGB Game by CS!!!"
+       todays_date: "{{ ansible_facts['date_time']['date'] }}"
+       host_name: "{{ ansible_facts['hostname'] }}"
+       fqdn_name: "{{ ansible_facts['fqdn'] }}"
+       ip_address: "{{ ansible_facts['eth0']['ipv4']['address'] }}"
+       os_family: "{{ ansible_facts['os_family'] }}"
+    tasks:
+       - name: Run apt update
+         shell: apt update
+         tags: 
+            - update
+
+       - name: Install nginx server
+         apt: >
+            name=nginx
+            state=present
+         tags: 
+           - nginx
+        
+       - name: Copy index.j2 file to destination
+         template: >
+             src=/tmp/ansibletemplatetesting/index.j2
+             dest=/var/www/html/index.nginx-debian.html
+             owner=root
+             group=root
+             mode=0644
+         notify: 
+            - restart nginx
+         tags:
+            - j2
+
+       - name: copy css files to destination
+         copy: >
+            src=/tmp/ansibletemplatetesting/style.css
+            dest=/var/www/html/style.css
+            owner=root
+            group=root
+            mode=0644
+         notify: 
+            - restart nginx
+         tags:
+            - css
+
+       - name: copy js files to destination
+         copy: >
+            src=/tmp/ansibletemplatetesting/scorekeeper.js
+            dest=/var/www/html/scorekeeper.js
+            owner=root
+            group=root
+            mode=0644
+         notify: 
+            - restart nginx
+         tags:
+            - js
+
+    handlers:
+       - name : restart nginx
+         command: service nginx restart
+        
+
+        
