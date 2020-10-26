@@ -1,0 +1,24 @@
+#Basic Playbook for installing nginx server.
+---
+  - name: playbook for installing nginx 
+    hosts: web
+    gather_facts: no
+    tasks:
+       - name: run apt update
+         shell: apt update
+
+       - name: install nginx
+         shell: apt install nginx -y
+
+       - name: start nginx server
+         shell: service nginx start
+
+  - name: playbook for installing unzip
+    hosts: web
+    gather_facts: no
+    tasks:
+       - name: run apt update
+         shell: apt update
+
+       - name: Install unzip
+         shell: apt install unzip -y

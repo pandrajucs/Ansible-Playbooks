@@ -1,0 +1,54 @@
+#Ansible lab setup
+
+1. Download the Docker image from hub.docker.com:
+
+docker pull sreeharshav/ubuntu16:withssh2.0_V2
+docker pull sreeharshav/ubuntu16:ansible2.75_V2
+
+2. Create a new network as below:
+
+docker network create --subnet 172.20.0.0/16 --gateway 172.20.0.254 ansible_nw
+
+3.Create three machines as below using the above network:
+
+docker run --rm -dit --name controller --hostname controller --network ansible_nw sreeharshav/ubuntu16:ansible2.75_V2
+docker run --rm -dit --name web1 --hostname web1 -p 8000:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name web2 --hostname web2 -p 8001:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name web3 --hostname web3 -p 8002:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name app1 --hostname app1 -p 9000:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name app2 --hostname app2 -p 9001:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name app3 --hostname app3 -p 9002:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db1 --hostname db1 -p 9003:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db2 --hostname db2 -p 9004:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db3 --hostname db3 -p 9005:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db4 --hostname db4 -p 9006:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+
+# Caching Ansible-facts
+
+To configure fact caching using redis, enable it in ansible.cfg as follows:
+
+nano /etc/ansible/ansible.cfg :
+
+[defaults]
+gathering = smart
+fact_caching = jsonfile
+fact_caching_connection = /tmp/factsjson
+fact_caching_timeout = 86400
+
+-> ll /tmp/factsjson/
+
+total 192
+drwxr-xr-x 2 root root  4096 Oct 25 06:54 ./
+drwxrwxrwt 1 root root  4096 Oct 25 07:21 ../
+-rw-r--r-- 1 root root 16561 Oct 25 06:53 app1
+-rw-r--r-- 1 root root 16561 Oct 25 06:53 app2
+-rw-r--r-- 1 root root 16561 Oct 25 06:53 app3
+-rw-r--r-- 1 root root 15632 Oct 25 06:54 db1
+-rw-r--r-- 1 root root 15632 Oct 25 06:54 db2
+-rw-r--r-- 1 root root 15633 Oct 25 06:53 db3
+-rw-r--r-- 1 root root 15633 Oct 25 06:53 db4
+-rw-r--r-- 1 root root 16561 Oct 25 07:10 web1
+-rw-r--r-- 1 root root 16561 Oct 25 06:53 web2
+-rw-r--r-- 1 root root 16561 Oct 25 06:53 web3
+
+
